@@ -1,0 +1,74 @@
+<div class="container mx-auto my-8">
+  <div class="flex justify-between items-center mb-4">
+    <%= link_to "Home", root_path, class: "text-blue-500 hover:text-blue-700" %>
+    <%= link_to "Create New Trader", new_admin_user_path, class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+  </div>
+
+  <h2 class="text-2xl font-bold mb-4">Approved Users</h2>
+  <% if @approved_users.any? %>
+    <div class="bg-white shadow-md rounded-lg p-4">
+      <table class="w-full">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="px-4 py-2 text-left">User ID</th>
+            <th class="px-4 py-2 text-left">Email</th>
+            <th class="px-4 py-2 text-left">Balance</th>
+            <th class="px-4 py-2 text-left">Options</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @approved_users.each do |user| %>
+            <tr class="border-b">
+              <td class="px-4 py-2"><%= user.id %></td>
+              <td class="px-4 py-2"><%= user.email %></td>
+              <td class="px-4 py-2"><%= user.balance %></td>
+              <td class="px-4 py-2">
+                <%= link_to "Show", admin_user_path(user), class: "text-blue-500 hover:text-blue-700" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="text-gray-500">No approved users found.</p>
+  <% end %>
+
+  <h2 class="text-2xl font-bold my-4">Pending Users</h2>
+  <% if @pending_users.any? %>
+    <div class="bg-white shadow-md rounded-lg p-4">
+      <table class="w-full">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="px-4 py-2 text-left">User ID</th>
+            <th class="px-4 py-2 text-left">Email</th>
+            <th class="px-4 py-2 text-left">Balance</th>
+            <th class="px-4 py-2 text-left">Approve</th>
+            <th class="px-4 py-2 text-left">Deny</th>
+            <th class="px-4 py-2 text-left">Options</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @pending_users.each do |user| %>
+            <tr class="border-b">
+              <td class="px-4 py-2"><%= user.id %></td>
+              <td class="px-4 py-2"><%= user.email %></td>
+              <td class="px-4 py-2"><%= user.balance %></td>
+              <td class="px-4 py-2">
+                <%= button_to 'Approve', approve_admin_user_path(user), method: :patch, data: { turbo_confirm: "Are you sure you want to Approve this user's registration?" }, class: "bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" %>
+              </td>
+              <td class="px-4 py-2">
+                <%= button_to 'Deny', deny_admin_user_path(user), method: :delete, data: { turbo_confirm: "Are you sure you want to Reject this user's registration?" }, class: "bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" %>
+              </td>
+              <td class="px-4 py-2">
+                <%= link_to "Show", admin_user_path(user), class: "text-blue-500 hover:text-blue-700" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="text-gray-500">No pending users for approval.</p>
+  <% end %>
+</div>

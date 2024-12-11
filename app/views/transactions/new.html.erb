@@ -1,0 +1,16 @@
+<h1>New Transaction for <%= @stock.symbol %></h1>
+
+<%= form_with model: @transaction, url: buy_transactions_path, local: true do |form| %>
+  <div>
+    <%= form.label :quantity, "Quantity" %>
+    <%= form.number_field :quantity, value: 1, min: 1, required: true %>
+  </div>
+  
+  <p><strong>Stock Price:</strong> <%= number_to_currency(@stock.stock_value) %></p>
+  <p><strong>Total Cost:</strong> <%= number_to_currency(@stock.stock_value * @transaction.quantity.to_i) %></p>
+  
+  <%= form.hidden_field :id, value: @stock.id %>
+  <%= form.submit "Buy Stock" %>
+<% end %>
+
+<%= link_to "Cancel", stock_path(@stock) %>

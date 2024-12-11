@@ -1,0 +1,17 @@
+<h1>Sell Stock: <%= @stock.symbol %></h1>
+
+<%= form_with url: sell_transactions_path, local: true do |form| %>
+  <div>
+    <%= form.label :quantity, "Enter Quantity to Sell" %>
+    <%= form.number_field :quantity, value: 1, min: 1, required: true %>
+  </div>
+  
+  <p><strong>Stock Price:</strong> <%= number_to_currency(@stock.stock_value) %></p>
+  <p><strong>Your Total Shares:</strong> <%= current_user.transactions.where(stock: @stock).sum(:quantity) %></p>
+  <p><strong>Potential Earnings:</strong> <%= number_to_currency(@stock.stock_value * @transaction.quantity.to_i) %></p>
+  
+  <%= form.hidden_field :id, value: @stock.id %>
+  <%= form.submit "Sell Stock" %>
+<% end %>
+
+<%= link_to "Cancel", stock_path(@stock) %>

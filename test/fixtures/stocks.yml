@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  stock_name: MyString
+  quantity: 1
+  price_per_stock: 1
+  total_price: 1
+
+two:
+  stock_name: MyString
+  quantity: 1
+  price_per_stock: 1
+  total_price: 1

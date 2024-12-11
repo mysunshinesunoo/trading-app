@@ -1,0 +1,10 @@
+<h1>Transaction Details</h1>
+
+<p><strong>Stock Symbol:</strong> <%= @transaction.symbol %></p>
+<p><strong>Type:</strong> <%= @transaction.transaction_type.capitalize %></p>
+<p><strong>Quantity:</strong> <%= @transaction.quantity %></p>
+<p><strong>Price per Stock:</strong> <%= @transaction.price_per_stock %></p>
+<p><strong>Total Price:</strong> <%=@transaction.total_price %></p>
+<p><strong>Date:</strong> <%= @transaction.created_at.strftime("%B %d, %Y %I:%M %p") %></p>
+
+<%= link_to "Back to Transactions", transactions_path %>

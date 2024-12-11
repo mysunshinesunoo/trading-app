@@ -1,0 +1,157 @@
+<div class="min-h-screen bg-gray-100 py-6 px-4 sm:px-6 lg:px-8">
+  <!-- Header -->
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Intraday Stock Data</h1>
+        <%= link_to root_path, class: "mt-2 inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-500" do %>
+          <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+          </svg>
+          Back to Home
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="mt-6">
+      <div class="bg-white shadow rounded-lg p-6">
+        <%= form_with url: intraday_stocks_path, method: :get, local: true, class: "space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-4" do |form| %>
+          <div class="w-full sm:w-96">
+            <%= form.label :symbol, "Enter stock symbol", class: "block text-sm font-medium text-gray-700" %>
+            <div class="mt-1 relative rounded-md shadow-sm">
+              <%= form.text_field :symbol, 
+                  required: true,
+                  class: "block w-full pr-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md",
+                  placeholder: "e.g., MSFT" %>
+              <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          <%= form.submit "Search Stock", 
+              class: "w-full sm:w-auto inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        <% end %>
+      </div>
+    </div>
+
+    <% if @intraday_data.present? %>
+      <!-- Stock Info and Trading Section -->
+      <div class="mt-8 grid gap-6 sm:grid-cols-2">
+        <!-- Stock Information Card -->
+        <div class="space-y-6">
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-6">
+              <div class="flex items-center justify-between">
+                <h2 class="text-xl font-semibold text-gray-900">
+                  <%= @stock_symbol.upcase %>
+                </h2>
+                <span class="px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                  Live Price
+                </span>
+              </div>
+              <div class="mt-4">
+                <p class="text-3xl font-bold text-gray-900">$<%= @latest_open_value %></p>
+                <p class="mt-1 text-sm text-gray-500">Current Stock Price</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Holdings Information Card -->
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-6">
+              <h3 class="text-lg font-medium text-gray-900">Your Holdings</h3>
+              <% current_holdings = Stock.where(user_id: current_user.id, symbol: @stock_symbol.upcase).sum(:quantity).to_i %>
+              <% if current_holdings && current_holdings > 0 %>
+                <div class="mt-4 space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-500">Shares Owned:</span>
+                    <span class="text-lg font-semibold text-gray-900"><%= current_holdings %></span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-500">Total Value:</span>
+                    <% if @latest_open_value.present? %>
+                    <span class="text-lg font-semibold text-green-600">
+                      $<%= (current_holdings * @latest_open_value).round(2) %>
+                    </span>
+                    <% else %>
+                    <span class="text-lg font-semibold text-gray-500">
+                      N/A
+                    </span>
+                    <% end %>
+                  </div>
+                </div>
+              <% else %>
+                <p class="mt-4 text-sm text-gray-500">
+                  You currently don't own any shares of <%= @stock_symbol.upcase %>
+                </p>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trading Actions Card -->
+        <div class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200">
+          <!-- Buy Form -->
+          <div class="p-6">
+            <h3 class="text-lg font-medium text-gray-900">Buy Stocks</h3>
+            <%= form_with url: buy_stocks_path, method: :post, local: true, class: "mt-4 space-y-4" do |form| %>
+              <%= form.hidden_field :symbol, value: @stock_symbol %>
+              <%= form.hidden_field :price, value: @latest_open_value %>
+              <div>
+                <%= form.label :quantity, "Quantity to Buy", class: "block text-sm font-medium text-gray-700" %>
+                <div class="mt-1 relative rounded-md shadow-sm">
+                  <%= form.number_field :quantity,
+                      min: 1,
+                      required: true,
+                      class: "block w-full pr-10 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm border-gray-300 rounded-md" %>
+                  <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <span class="text-gray-500 sm:text-sm">shares</span>
+                  </div>
+                </div>
+              </div>
+              <%= form.submit "Buy Now", 
+                  class: "w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+            <% end %>
+          </div>
+
+          <!-- Sell Form -->
+          <div class="p-6">
+            <h3 class="text-lg font-medium text-gray-900">Sell Stocks</h3>
+            <%= form_with url: sell_stocks_path, method: :post, local: true, class: "mt-4 space-y-4" do |form| %>
+              <%= form.hidden_field :symbol, value: @stock_symbol %>
+              <%= form.hidden_field :price, value: @latest_open_value %>
+              <div>
+                <%= form.label :quantity, "Quantity to Sell", class: "block text-sm font-medium text-gray-700" %>
+                <div class="mt-1 relative rounded-md shadow-sm">
+                  <%= form.number_field :quantity,
+                      min: 1,
+                      max: current_holdings,
+                      required: true,
+                      disabled: current_holdings == 0,
+                      class: "block w-full pr-10 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm border-gray-300 rounded-md 
+                             #{current_holdings == 0 ? 'bg-gray-100 cursor-not-allowed' : ''}" %>
+                  <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <span class="text-gray-500 sm:text-sm">shares</span>
+                  </div>
+                </div>
+                <% if current_holdings > 0 %>
+                  <p class="mt-1 text-xs text-gray-500">Maximum: <%= current_holdings %> shares</p>
+                <% end %>
+              </div>
+              <%= form.submit "Sell Now", 
+                  disabled: current_holdings == 0,
+                  class: "w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white
+                         #{current_holdings == 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'}" %>
+            <% end %>
+            <% if current_holdings == 0 %>
+              <p class="mt-2 text-xs text-gray-500 text-center">You need to own shares to sell</p>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
